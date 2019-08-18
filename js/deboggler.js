@@ -1,4 +1,4 @@
-var boardSize = 20;
+var boardSize = 5;
 var charLimit = 0;
 var minCharLimit = 4;
 
@@ -20,19 +20,6 @@ class Dictionary {
     }
 }
 
-var testdict = 
-new Dictionary("Test Dict",
-    (function (){
-        return {"one": 1, "two": 2};
-    }), 
-    function(word) {
-        return true;
-    },
-    function (word) {
-        return true;
-    }
-);
-
 function buildDict()
 {
 
@@ -45,26 +32,56 @@ function buildDict()
     dicts = [
         new Dictionary("Binary Search String", 
             function() {
-                console.time("Build Dict: Binary Search String");
+                console.time("Build Dict: Binary Search String ");
                 // Initialize first letter
                 var d = {};
                 for (var i = 10; i<36; i++) {
                     d[i.toString(36)] = [];
                 }
+                var radix;
                 dict.forEach(function (word, i) {
+                    radix = word.length-1;
                     if(word.length >= minCharLimit) {
-                        d[word.substr(0,1)][word.length] = d[word.substr(0,1)][word.length] || "";
-                        d[word.substr(0,1)][word.length] += word;
+                        d[word.substr(0,1)][radix] = d[word.substr(0,1)][radix] || "";
+                        d[word.substr(0,1)][radix] += word.substring(1);
                     }
                 });
-                console.timeEnd("Build Dict: Binary Search String");
+                console.timeEnd("Build Dict: Binary Search String ");
                 return d;
             }, 
             function(word) {
-                return true;
+                var suffix = word.substring(1);
+                var radix = suffix.length;
+                var dictSlice = this.dict[word.substring(0,1)];
+                var keys = Object.keys(dictSlice);
+                var dictStr;
+                for (radix; radix <= keys[keys.length-1]; radix++) {
+                    if (!dictSlice.hasOwnProperty(radix)) {
+                        continue;
+                    }
+                    dictStr = dictSlice[radix];
+                    var l = 0;
+                    var m;
+                    var h = dictStr.length/radix - 1;
+                    while (l <= h) {
+                        m = Math.floor((l + h) / 2);
+                        var str = dictStr.substr(m*radix, radix).substring(0,suffix.length);
+                        if (suffix > str) {
+                            l = m + 1;
+                        }
+                        else if (suffix < str) {
+                            h = m - 1;
+                        }
+                        else {
+                            return word.substring(0,1) + str;
+                        }
+                    }
+                }
+                return false;
             },
             function (word) {
-                var radix = word.length;
+                var suffix = word.substring(1);
+                var radix = word.length-1;
                 var dictStr = this.dict[word.substr(0,1)][radix];
                 if (!dictStr) {
                     return false;
@@ -75,14 +92,14 @@ function buildDict()
                 while (l <= h) {
                     m = Math.floor((l + h) / 2);
                     var str = dictStr.substr(m*radix, radix);
-                    if (word > str) {
+                    if (suffix > str) {
                         l = m + 1;
                     }
-                    else if (word < str) {
+                    else if (suffix < str) {
                         h = m - 1;
                     }
                     else {
-                        return str;
+                        return word.substring(0,1) + str;
                     }
                 }
                 return false;
@@ -187,6 +204,7 @@ function buildDict()
     console.log("--- CHECKING DICTIONARIES");
     fisherYates(dict);
     dicts.forEach(function(d, i) {
+        console.log("TESTING: " + d.name);
         console.log(d);
         console.time("TESTING: " + d.name);
         checkDictionary(d);
@@ -196,7 +214,7 @@ function buildDict()
     // return;
     console.log("--- SOLVING BOARD");
     generateBoard();
-    for(var i = 1; i < 3; i++) {
+    for(var i = 0; i < dicts.length; i++) {
         var d = dicts[i];
         canBeWord = d.canBeWord.bind(d);
         isWord = d.isWord.bind(d);
@@ -261,7 +279,7 @@ function solveRecurse(word, row, col, memo)
     
     word += board[row][col];
     memo[row][col] = true;
-    if (word.length >= minCharLimit) {
+    if (word.length >= 2) {
         CANBEWORDCHECKS++;
         if (canBeWord(word))
         {
