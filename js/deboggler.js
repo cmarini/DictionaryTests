@@ -1,6 +1,6 @@
 var boardSize = 5;
 var charLimit = 0;
-var minCharLimit = 4;
+var minCharLimit = 3;
 
 var CANBEWORDCHECKS = 0;
 
@@ -105,6 +105,7 @@ function buildDict()
                 return false;
             }
         ),
+        /*
         new Dictionary("Trie", 
             function() {
                 console.time("Build Dict: Trie");
@@ -155,6 +156,8 @@ function buildDict()
                 }
             }
         ),
+        */
+        /*
         new Dictionary("Prefix Index", 
             function() {
                 console.time("Build Dict: Prefix Index");
@@ -198,6 +201,7 @@ function buildDict()
                 })[0]);
             }
         ),
+        */
     ];
     
     // return;
