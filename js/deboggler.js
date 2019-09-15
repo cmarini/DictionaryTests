@@ -12,11 +12,13 @@ var board;
 var dicts = [];
 
 class Dictionary {
-    constructor(name, dictGenerator, func_canBeWord, func_isWord) {
+    constructor(name, dictGenerator, func_canBeWord, func_isWord, func_searchStart, func_searchContains) {
         this.name = name;
         this.dict = dictGenerator();
         this.canBeWord = func_canBeWord;
         this.isWord = func_isWord;
+        this.searchStart = func_searchStart;
+        this.searchContains = func_searchContains;
     }
 }
 
@@ -31,7 +33,7 @@ function buildDict()
 
     dicts = [
         new Dictionary("Binary Search String", 
-            function() {
+            function() { // Dict Generator
                 console.time("Build Dict: Binary Search String ");
                 // Initialize first letter
                 var d = {};
@@ -49,7 +51,7 @@ function buildDict()
                 console.timeEnd("Build Dict: Binary Search String ");
                 return d;
             }, 
-            function(word) {
+            function(word) { // Can Be Word
                 var suffix = word.substring(1);
                 var radix = suffix.length;
                 var dictSlice = this.dict[word.substring(0,1)];
@@ -79,7 +81,7 @@ function buildDict()
                 }
                 return false;
             },
-            function (word) {
+            function (word) { // Is Word
                 var suffix = word.substring(1);
                 var radix = word.length-1;
                 var dictStr = this.dict[word.substr(0,1)][radix];
@@ -103,8 +105,51 @@ function buildDict()
                     }
                 }
                 return false;
-            }
-        ),
+            },
+			function (word) { // Search Start
+				
+				return;
+			},
+			function (word) { // Search Contains
+				console.time("Search Contains");
+				var matchList = [];
+				// var suffix = word.substring(1);
+				var d = this.dict;
+				var radix;
+				var dictSliceKeys = Object.keys(d);
+				// iterate dict by starting letter
+				dictSliceKeys.forEach(function (key) {
+					if (word.indexOf(key) >= 0) {
+						// the search term could be in this dict key
+						radix = word.length-1;
+					} else {
+						// search term does not contain the key letter. Must be at least one letter longer.
+						radix = word.length;
+					}
+					var dictSlice = d[key];
+					var radices = Object.keys(dictSlice);
+					// Iterate over each dict string at least that length
+					for (var r = 0; r < radices.length; r++) {
+						if (!dictSlice.hasOwnProperty(radix)) {
+							radix++;
+							continue;
+						}
+						var words = chunkString(dictSlice[radix], radix);
+						var w;
+						for (var i = 0; i < words.length; i++) {
+							w = key + words[i];
+							if (w.indexOf(word) >=0 ) {
+								//console.log(w);
+								matchList.push(w);
+							}
+						}
+						radix++;
+					}
+				});
+				console.timeEnd("Search Contains");
+				return matchList;
+			}
+        )
         /*
         new Dictionary("Trie", 
             function() {
@@ -367,4 +412,15 @@ function removeDup (list)
         }
         return false;
     });
+}
+
+function chunkString(str, len) {
+    var size = str.length / len + .5 | 0,
+        ret  = new Array(size),
+        offset = 0;
+  
+    for(var i = 0; i < size; ++i, offset += len) {
+      ret[i] = str.substring(offset, offset + len);
+	}
+	return ret;
 }
