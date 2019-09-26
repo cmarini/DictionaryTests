@@ -14,14 +14,23 @@
     </code>
 
 </body>
-    
+
+<script src="js/lodash.min.js"></script>
+<script src="js/platform.js"></script>
+<script src="js/benchmark.js"></script>    
 <script type="text/javascript" src="js/jquery.js"></script>
 <script type="text/javascript" src="js/dict.js"></script>
 <script type="text/javascript" src="js/deboggler.js"></script>
 
+<script type="text/javascript" src="js/test.js"></script>
+
+
 <script type="text/javascript">
 $(document).ready(function() {
-    buildDict();
+    buildDict()
+    runTest_searchContains();
+    // runTest_solve();
+    // runTest_validation();
 });
 </script>
 

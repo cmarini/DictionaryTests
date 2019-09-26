@@ -1,4 +1,4 @@
-var boardSize = 5;
+var boardSize = 8;
 var charLimit = 0;
 var minCharLimit = 3;
 
@@ -111,7 +111,6 @@ function buildDict()
 				return;
 			},
 			function (word) { // Search Contains
-				console.time("Search Contains");
 				var matchList = [];
 				// var suffix = word.substring(1);
 				var d = this.dict;
@@ -146,10 +145,9 @@ function buildDict()
 						radix++;
 					}
 				});
-				console.timeEnd("Search Contains");
 				return matchList;
 			}
-        )
+        ),
         /*
         new Dictionary("Trie", 
             function() {
@@ -202,7 +200,6 @@ function buildDict()
             }
         ),
         */
-        /*
         new Dictionary("Prefix Index", 
             function() {
                 console.time("Build Dict: Prefix Index");
@@ -244,13 +241,22 @@ function buildDict()
                 return (this.dict[word.substring(0,minCharLimit)].filter(function (x){
                     return x==word;
                 })[0]);
-            }
+            },
+			function (word) { // Search Start
+				return dict.filter(function (w,i){
+                    return (w.search(word) == 0);
+                });
+			},
+			function (word) { // Search Contains
+				return dict.filter(function (w,i){
+                    return (w.search(word) >= 0);
+                });
+			},
         ),
-        */
     ];
     
-    // return;
-    console.log("--- CHECKING DICTIONARIES");
+    return;
+    console.log("--- VALIDATING DICTIONARIES");
     fisherYates(dict);
     dicts.forEach(function(d, i) {
         console.log("TESTING: " + d.name);
@@ -259,10 +265,9 @@ function buildDict()
         checkDictionary(d);
         console.timeEnd("TESTING: " + d.name);
     });
-    console.log("--- DONE CHECKING DICTIONARIES");
+    console.log("--- DONE VALIDATING DICTIONARIES");
     // return;
     console.log("--- SOLVING BOARD");
-    generateBoard();
     for(var i = 0; i < dicts.length; i++) {
         var d = dicts[i];
         canBeWord = d.canBeWord.bind(d);
@@ -316,7 +321,7 @@ function solve()
             solveRecurse("", row, col, memo);
         }
     }
-    console.log("canBeWord Checks = "+CANBEWORDCHECKS);
+    // console.log("canBeWord Checks = "+CANBEWORDCHECKS);
     validWords = removeDup(validWords);
 }
   
